@@ -14,22 +14,23 @@ import java.net.SocketException;
 
 public class RtpReceiver implements ActionListener {
 
-    private Client client;
+    private Stats stats;
 
     private DatagramSocket RTPsocket;        //socket to be used to send and receive UDP packets
     private Timer timer; //timer used to receive data from the UDP socket
     private byte[] buf;  //buffer used to store data received from the server
-    private FrameSynchronizer fsynch;
+    private VideoBuffer videoBuffer;
 
-    RtpReceiver(Client client) {
-        this.client = client;
+    RtpReceiver(Stats stats, VideoBuffer videoBuffer) {
+        this.stats = stats;
+        this.videoBuffer = videoBuffer;
         timer = new Timer(20, this);
         timer.setInitialDelay(0);
         timer.setCoalesce(true);
 
         buf = new byte[15000];
 
-        fsynch = new FrameSynchronizer(100);
+        videoBuffer = new VideoBuffer();
     }
 
     public void openSocket() throws SocketException {
@@ -77,18 +78,13 @@ public class RtpReceiver implements ActionListener {
             byte [] payload = new byte[payloadLength];
             rtp_packet.getpayload(payload);
 
-            client.getStats().update(seqNb, payloadLength);
-            client.getGUI().updateStatsLabel();
+            stats.update(seqNb, payloadLength);
 
             //get an Image object from the payload bitstream
             Toolkit toolkit = Toolkit.getDefaultToolkit();
-            fsynch.addFrame(toolkit.createImage(payload, 0, payloadLength), seqNb);
+            videoBuffer.addFrame(toolkit.createImage(payload, 0, payloadLength), seqNb);
 
             //update video frame
-            client.getGUI().setNextFrame(fsynch.nextFrame());
-        }
-        catch (InterruptedIOException iioe) {
-            System.out.println("Nothing to read");
         }
         catch (IOException ioe) {
             System.out.println("Exception caught: "+ioe);

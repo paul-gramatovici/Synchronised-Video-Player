@@ -34,14 +34,15 @@ public class Client {
 
     public Client(String serverHost, int RTSP_server_port, String filename) throws Exception {
 
-        gui = new GUI(this);
-
-        rtpReceiver = new RtpReceiver(this);
-        rtcpSender = new RtcpSender(this,400);
+        VideoBuffer videoBuffer = new VideoBuffer();
+        gui = new GUI(this, videoBuffer);
 
         stats = new Stats();
 
         serverIPAddr = InetAddress.getByName(serverHost);
+
+        rtpReceiver = new RtpReceiver(stats, videoBuffer);
+        rtcpSender = new RtcpSender(400, stats, serverIPAddr);
 
         VideoFileName = filename;
 

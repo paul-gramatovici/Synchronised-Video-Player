@@ -9,13 +9,15 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 
 public class RtcpSender implements ActionListener {
 
     private static final int RTCP_RCV_PORT = 19001;   //port where the client will receive the RTP packets
 
-    private final Client client;
+    private Stats stats;
+    private InetAddress serverIP;
 
     private DatagramSocket RTCPsocket;          //UDP socket for sending RTCP packets
     private Timer rtcpTimer;
@@ -25,9 +27,11 @@ public class RtcpSender implements ActionListener {
 
 
 
-    RtcpSender(Client client, int interval) {
-        this.client = client;
+    RtcpSender(int interval, Stats stats, InetAddress serverIP) {
+
         rtcpTimer = new Timer(interval, this);
+        this.stats = stats;
+        this.serverIP = serverIP;
         rtcpTimer.setInitialDelay(0);
         rtcpTimer.setCoalesce(true);
     }
@@ -39,19 +43,19 @@ public class RtcpSender implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         // Calculate the stats for this period
-        int numPktsExpected = client.getStats().getHighSeqNb() - lastHighSeqNb;
-        int numPktsLost = client.getStats().getCumLost() - lastCumLost;
+        int numPktsExpected = stats.getHighSeqNb() - lastHighSeqNb;
+        int numPktsLost = stats.getCumLost() - lastCumLost;
         float fractionLost = numPktsExpected == 0 ? 0f : (float) numPktsLost / numPktsExpected;
-        lastHighSeqNb = client.getStats().getHighSeqNb();
-        lastCumLost = client.getStats().getCumLost();
+        lastHighSeqNb = stats.getHighSeqNb();
+        lastCumLost = stats.getCumLost();
 
-        RTCPpacket rtcp_packet = new RTCPpacket(fractionLost, client.getStats().getCumLost(), client.getStats().getHighSeqNb());
+        RTCPpacket rtcp_packet = new RTCPpacket(fractionLost, stats.getCumLost(), stats.getHighSeqNb());
         int packet_length = rtcp_packet.getlength();
         byte[] packet_bits = new byte[packet_length];
         rtcp_packet.getpacket(packet_bits);
 
         try {
-            DatagramPacket dp = new DatagramPacket(packet_bits, packet_length, client.getServerIPAddr(), RTCP_RCV_PORT);
+            DatagramPacket dp = new DatagramPacket(packet_bits, packet_length, serverIP, RTCP_RCV_PORT);
             RTCPsocket.send(dp);
         } catch (InterruptedIOException iioe) {
             System.out.println("Nothing to read");

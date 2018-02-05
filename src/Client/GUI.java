@@ -7,17 +7,28 @@ import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 
 class GUI {
+    private final static int FRAME_PERIOD = 33;
+
     private Client client;
+    private VideoBuffer videoBuffer;
+
     private JLabel statLabel1 = new JLabel();
     private JLabel statLabel2 = new JLabel();
     private JLabel statLabel3 = new JLabel();
     private JLabel iconLabel = new JLabel();
 
+    private int frames = 0;
 
-    GUI(Client client) {
+    GUI(Client client, VideoBuffer videoBuffer) {
+        this.videoBuffer = videoBuffer;
         this.client = client;
+
         //build GUI
         //--------------------------
+
+        Timer timer = new Timer(FRAME_PERIOD, (e) -> update());
+        timer.setInitialDelay(0);
+        timer.setCoalesce(true);
 
         //Frame
         JFrame f = new JFrame("Client");
@@ -41,9 +52,9 @@ class GUI {
         JButton describeButton = new JButton("Session");
         buttonPanel.add(describeButton);
         setupButton.addActionListener((e) -> client.setup());
-        playButton.addActionListener((e) -> client.play());
-        pauseButton.addActionListener((e) -> client.pause());
-        tearButton.addActionListener((e) -> client.teardown());
+        playButton.addActionListener((e) -> {client.play(); timer.start();});
+        pauseButton.addActionListener((e) -> {client.pause(); timer.stop();});
+        tearButton.addActionListener((e) -> {client.teardown(); timer.stop();});
         describeButton.addActionListener((e) -> client.describe());
 
         //Statistics
@@ -73,14 +84,22 @@ class GUI {
         f.setVisible(true);
     }
 
-    public void updateStatsLabel() {
+    private void updateStatsLabel() {
         DecimalFormat formatter = new DecimalFormat("###,###.##");
         statLabel1.setText("Total Bytes Received: " + client.getStats().getTotalBytes());
         statLabel2.setText("Packet Lost Rate: " + formatter.format(client.getStats().getFractionLost()));
         statLabel3.setText("Data Rate: " + formatter.format(client.getStats().getDataRate()) + " bytes/s");
     }
 
-    public void setNextFrame(Image frame) {
+    private void updateFrame() {
+        Image frame = videoBuffer.nextFrame();
+        ++frames;
+        System.out.println(frames + "\n");
         iconLabel.setIcon(new ImageIcon(frame));
+    }
+
+    private void update() {
+        updateStatsLabel();
+        updateFrame();
     }
 }
