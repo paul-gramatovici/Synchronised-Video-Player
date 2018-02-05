@@ -25,8 +25,8 @@ public class Server extends JFrame implements ActionListener {
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packets
     DatagramPacket senddp; //UDP packet containing the video frames
 
-    InetAddress ClientIPAddr;   //Client.Client IP address
-    int RTP_dest_port = 0;      //destination port for RTP packets  (given by the RTSP Client.Client)
+    InetAddress ClientIPAddr;   //RtspClient.RtspClient IP address
+    int RTP_dest_port = 0;      //destination port for RTP packets  (given by the RTSP RtspClient.RtspClient)
     int RTSP_dest_port = 0;
 
     //GUI:
@@ -146,7 +146,7 @@ public class Server extends JFrame implements ActionListener {
         server.RTSPsocket = listenSocket.accept();
         listenSocket.close();
 
-        //Get Client.Client IP address
+        //Get RtspClient.RtspClient IP address
         server.ClientIPAddr = server.RTSPsocket.getInetAddress();
 
         //Initiate RTSPstate
@@ -431,7 +431,7 @@ public class Server extends JFrame implements ActionListener {
         try { 
             //parse request line and extract the request_type:
             String RequestLine = RTSPBufferedReader.readLine();
-            System.out.println("RTSP Server.Server - Received from Client.Client:");
+            System.out.println("RTSP Server.Server - Received from RtspClient.RtspClient:");
             System.out.println(RequestLine);
 
             StringTokenizer tokens = new StringTokenizer(RequestLine);
@@ -518,7 +518,7 @@ public class Server extends JFrame implements ActionListener {
             RTSPBufferedWriter.write("CSeq: "+RTSPSeqNb+CRLF);
             RTSPBufferedWriter.write("Session: "+RTSPid+CRLF);
             RTSPBufferedWriter.flush();
-            System.out.println("RTSP Server.Server - Sent response to Client.Client.");
+            System.out.println("RTSP Server.Server - Sent response to RtspClient.RtspClient.");
         } catch(Exception ex) {
             System.out.println("Exception caught: "+ex);
             System.exit(0);
@@ -532,7 +532,7 @@ public class Server extends JFrame implements ActionListener {
             RTSPBufferedWriter.write("CSeq: "+RTSPSeqNb+CRLF);
             RTSPBufferedWriter.write(des);
             RTSPBufferedWriter.flush();
-            System.out.println("RTSP Server.Server - Sent response to Client.Client.");
+            System.out.println("RTSP Server.Server - Sent response to RtspClient.RtspClient.");
         } catch(Exception ex) {
             System.out.println("Exception caught: "+ex);
             System.exit(0);

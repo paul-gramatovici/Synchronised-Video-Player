@@ -9,8 +9,8 @@ import java.text.DecimalFormat;
 class GUI {
     private final static int FRAME_PERIOD = 33;
 
-    private Client client;
     private VideoBuffer videoBuffer;
+    private Stats stats;
 
     private JLabel statLabel1 = new JLabel();
     private JLabel statLabel2 = new JLabel();
@@ -19,9 +19,9 @@ class GUI {
 
     private int frames = 0;
 
-    GUI(Client client, VideoBuffer videoBuffer) {
+    GUI(RtspClient rtspClient, VideoBuffer videoBuffer, Stats stats) {
         this.videoBuffer = videoBuffer;
-        this.client = client;
+        this.stats = stats;
 
         //build GUI
         //--------------------------
@@ -51,11 +51,14 @@ class GUI {
         buttonPanel.add(tearButton);
         JButton describeButton = new JButton("Session");
         buttonPanel.add(describeButton);
-        setupButton.addActionListener((e) -> client.setup());
-        playButton.addActionListener((e) -> {client.play(); timer.start();});
-        pauseButton.addActionListener((e) -> {client.pause(); timer.stop();});
-        tearButton.addActionListener((e) -> {client.teardown(); timer.stop();});
-        describeButton.addActionListener((e) -> client.describe());
+        setupButton.addActionListener((e) -> rtspClient.setup());
+        playButton.addActionListener((e) -> {
+            rtspClient.play(); timer.start();});
+        pauseButton.addActionListener((e) -> {
+            rtspClient.pause(); timer.stop();});
+        tearButton.addActionListener((e) -> {
+            rtspClient.teardown(); timer.stop();});
+        describeButton.addActionListener((e) -> rtspClient.describe());
 
         //Statistics
         statLabel1.setText("Total Bytes Received: 0");
@@ -86,9 +89,9 @@ class GUI {
 
     private void updateStatsLabel() {
         DecimalFormat formatter = new DecimalFormat("###,###.##");
-        statLabel1.setText("Total Bytes Received: " + client.getStats().getTotalBytes());
-        statLabel2.setText("Packet Lost Rate: " + formatter.format(client.getStats().getFractionLost()));
-        statLabel3.setText("Data Rate: " + formatter.format(client.getStats().getDataRate()) + " bytes/s");
+        statLabel1.setText("Total Bytes Received: " + stats.getTotalBytes());
+        statLabel2.setText("Packet Lost Rate: " + formatter.format(stats.getFractionLost()));
+        statLabel3.setText("Data Rate: " + formatter.format(stats.getDataRate()) + " bytes/s");
     }
 
     private void updateFrame() {

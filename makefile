@@ -1,10 +1,10 @@
 JC = javac
 J = java
 
-default: Client.Client.class Server.Server.class Server.VideoStream.class Packets.RTPpacket.class Packets.RTCPpacket.class
+default: Client.RtspClient.class Server.Server.class Server.VideoStream.class Packets.RTPpacket.class Packets.RTCPpacket.class
 
-Client.Client.class: Client.Client.java
-	$(JC) $(JFLAGS) Client.Client.java
+Client.RtspClient.class: Client.RtspClient.java
+	$(JC) $(JFLAGS) Client.RtspClient.java
 Server.Server.class: Server.Server.java
 	$(JC) $(JFLAGS) Server.Server.java
 Server.VideoStream.class: Server.VideoStream.java
