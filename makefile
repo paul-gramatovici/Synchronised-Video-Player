@@ -1,17 +1,17 @@
 JC = javac
 J = java
 
-default: Client.class Server.class VideoStream.class RTPpacket.class RTCPpacket.class
+default: Client.Client.class Server.Server.class Server.VideoStream.class Packets.RTPpacket.class Packets.RTCPpacket.class
 
-Client.class: Client.java
-	$(JC) $(JFLAGS) Client.java
-Server.class: Server.java
-	$(JC) $(JFLAGS) Server.java 
-VideoStream.class: VideoStream.java
-	$(JC) $(JFLAGS) VideoStream.java 
-RTPpacket.class: RTPpacket.java
-	$(JC) $(JFLAGS) RTPpacket.java 
-RTCPpacket.class: RTCPpacket.java
-	$(JC) $(JFLAGS) RTCPpacket.java 
+Client.Client.class: Client.Client.java
+	$(JC) $(JFLAGS) Client.Client.java
+Server.Server.class: Server.Server.java
+	$(JC) $(JFLAGS) Server.Server.java
+Server.VideoStream.class: Server.VideoStream.java
+	$(JC) $(JFLAGS) Server.VideoStream.java
+Packets.RTPpacket.class: Packets.RTPpacket.java
+	$(JC) $(JFLAGS) Packets.RTPpacket.java
+Packets.RTCPpacket.class: Packets.RTCPpacket.java
+	$(JC) $(JFLAGS) Packets.RTCPpacket.java
 clean:
 	rm -f *.class
