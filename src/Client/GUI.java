@@ -75,9 +75,9 @@ class GUI {
 
     public void updateStatsLabel() {
         DecimalFormat formatter = new DecimalFormat("###,###.##");
-        statLabel1.setText("Total Bytes Received: " + client.getStatTotalBytes());
-        statLabel2.setText("Packet Lost Rate: " + formatter.format(client.getStatFractionLost()));
-        statLabel3.setText("Data Rate: " + formatter.format(client.getStatDataRate()) + " bytes/s");
+        statLabel1.setText("Total Bytes Received: " + client.getStats().getTotalBytes());
+        statLabel2.setText("Packet Lost Rate: " + formatter.format(client.getStats().getFractionLost()));
+        statLabel3.setText("Data Rate: " + formatter.format(client.getStats().getDataRate()) + " bytes/s");
     }
 
     public void setNextFrame(Image frame) {
