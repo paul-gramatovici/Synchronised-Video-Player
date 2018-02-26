@@ -5,26 +5,26 @@ import java.util.*;
 public class RTPpacket{
 
     //size of the RTP header:
-    static int HEADER_SIZE = 12;
+    private static int HEADER_SIZE = 12;
 
     //Fields that compose the RTP header
-    public int Version;
-    public int Padding;
-    public int Extension;
-    public int CC;
-    public int Marker;
-    public int PayloadType;
-    public int SequenceNumber;
-    public int TimeStamp;
-    public int Ssrc;
+    private int Version;
+    private int Padding;
+    private int Extension;
+    private int CC;
+    private int Marker;
+    private int PayloadType;
+    private int SequenceNumber;
+    private int TimeStamp;
+    private int Ssrc;
     
     //Bitstream of the RTP header
-    public byte[] header;
+    private byte[] header;
 
     //size of the RTP payload
-    public int payload_size;
+    private int payload_size;
     //Bitstream of the RTP payload
-    public byte[] payload;
+    private byte[] payload;
     
     //--------------------------
     //Constructor of an Packets.RTPpacket object from header fields and payload bitstream
@@ -86,14 +86,12 @@ public class RTPpacket{
         {
             //get the header bitsream:
             header = new byte[HEADER_SIZE];
-            for (int i=0; i < HEADER_SIZE; i++)
-                header[i] = packet[i];
+            System.arraycopy(packet, 0, header, 0, HEADER_SIZE);
 
             //get the payload bitstream:
             payload_size = packet_size - HEADER_SIZE;
             payload = new byte[payload_size];
-            for (int i=HEADER_SIZE; i < packet_size; i++)
-                payload[i-HEADER_SIZE] = packet[i];
+            System.arraycopy(packet, HEADER_SIZE, payload, 0, packet_size - HEADER_SIZE);
 
             //interpret the changing fields of the header:
             Version = (header[0] & 0xFF) >>> 6;
@@ -108,8 +106,7 @@ public class RTPpacket{
     //--------------------------
     public int getpayload(byte[] data) {
 
-        for (int i=0; i < payload_size; i++)
-            data[i] = payload[i];
+        System.arraycopy(payload, 0, data, 0, payload_size);
 
         return(payload_size);
     }
@@ -129,15 +126,13 @@ public class RTPpacket{
     }
 
     //--------------------------
-    //getpacket: returns the packet bitstream and its length
+    //getPacket: returns the packet bitstream and its length
     //--------------------------
     public int getpacket(byte[] packet)
     {
         //construct the packet = header + payload
-        for (int i=0; i < HEADER_SIZE; i++)
-            packet[i] = header[i];
-        for (int i=0; i < payload_size; i++)
-            packet[i+HEADER_SIZE] = payload[i];
+        System.arraycopy(header, 0, packet, 0, HEADER_SIZE);
+        System.arraycopy(payload, 0, packet, HEADER_SIZE, payload_size);
 
         //return total size of the packet
         return(payload_size + HEADER_SIZE);

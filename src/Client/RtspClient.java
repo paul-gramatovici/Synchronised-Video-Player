@@ -1,5 +1,7 @@
 package Client;
 
+import Utils.RtspState;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -9,16 +11,13 @@ public class RtspClient {
     private final static String CRLF = "\r\n";
 
     //RTSP
-    private final static int INIT = 0;
-    private final static int READY = 1;
-    private final static int PLAYING = 2;
-    private int state;
+    private RtspState state;
     private Socket RTSPsocket;           //socket used to send/receive RTSP messages
     private BufferedReader RTSPBufferedReader;
     private BufferedWriter RTSPBufferedWriter;
     private String VideoFileName; //video file to request to the server
     private int RTSPSeqNb;           //Sequence number of RTSP messages within the session
-    private String RTSPid;              // ID of the RTSP session (given by the RTSP Server.Server)
+    private String RTSPid;              // ID of the RTSP session (given by the RTSP ServerInstance.ServerInstance)
 
     //RTCP
     private RtcpSender rtcpSender;
@@ -43,14 +42,14 @@ public class RtspClient {
         RTSPBufferedReader = new BufferedReader(new InputStreamReader(RTSPsocket.getInputStream()));
         RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(RTSPsocket.getOutputStream()));
 
-        state = INIT;
+        state = RtspState.INIT;
 
         RTSPSeqNb = 0;
     }
 
     public void setup(){
         System.out.println("Setup Button pressed !");
-        if (state == INIT) {
+        if (state == RtspState.INIT) {
             try {
                 rtpReceiver.openSocket();
                 rtcpSender.openSocket();
@@ -64,12 +63,12 @@ public class RtspClient {
             RTSPSeqNb = 0;
 
             sendRequest("SETUP");
-
+            System.out.println("***!");
             if (parseServerResponse() != 200)
-                System.out.println("Invalid Server.Server Response");
+                System.out.println("Invalid ServerInstance.ServerInstance Response");
             else
             {
-                state = READY;
+                state = RtspState.READY;
                 System.out.println("New RTSP state: READY");
             }
         }
@@ -78,13 +77,13 @@ public class RtspClient {
     public void play() {
         System.out.println("Play Button pressed!");
         stats.setStartTime(System.currentTimeMillis());
-        if (state == READY) {
+        if (state == RtspState.READY) {
             sendRequest("PLAY");
             if (parseServerResponse() != 200) {
-                System.out.println("Invalid Server.Server Response");
+                System.out.println("Invalid ServerInstance.ServerInstance Response");
             }
             else {
-                state = PLAYING;
+                state = RtspState.PLAYING;
                 System.out.println("New RTSP state: PLAYING");
                 rtpReceiver.start();
                 rtcpSender.start();
@@ -94,12 +93,12 @@ public class RtspClient {
 
     public void pause(){
        System.out.println("Pause Button pressed!");
-        if (state == PLAYING) {
+        if (state == RtspState.PLAYING) {
             sendRequest("PAUSE");
             if (parseServerResponse() != 200) {
-                System.out.println("Invalid Server.Server Response");
+                System.out.println("Invalid ServerInstance.ServerInstance Response");
             } else {
-                state = READY;
+                state = RtspState.READY;
                 System.out.println("New RTSP state: READY");
                 rtpReceiver.pause();
                 rtcpSender.pause();
@@ -111,9 +110,9 @@ public class RtspClient {
         System.out.println("Teardown Button pressed !");
         sendRequest("TEARDOWN");
         if (parseServerResponse() != 200) {
-            System.out.println("Invalid Server.Server Response");
+            System.out.println("Invalid ServerInstance.ServerInstance Response");
         } else {
-            state = INIT;
+            state = RtspState.INIT;
             System.out.println("New RTSP state: INIT");
             rtpReceiver.stop();
             rtcpSender.stop();
@@ -126,7 +125,7 @@ public class RtspClient {
         System.out.println("Sending DESCRIBE request");
         sendRequest("DESCRIBE");
         if (parseServerResponse() != 200) {
-            System.out.println("Invalid Server.Server Response");
+            System.out.println("Invalid ServerInstance.ServerInstance Response");
         } else {
             System.out.println("Received response for DESCRIBE");
         }
@@ -138,7 +137,7 @@ public class RtspClient {
         try {
             //parse status line and extract the reply_code:
             String StatusLine = RTSPBufferedReader.readLine();
-            System.out.println("RTSP RtspClient.RtspClient - Received from Server.Server:");
+            System.out.println("RTSP RtspClient.RtspClient - Received from ServerInstance.ServerInstance:");
             System.out.println(StatusLine);
 
             StringTokenizer tokens = new StringTokenizer(StatusLine);
@@ -156,7 +155,7 @@ public class RtspClient {
                 tokens = new StringTokenizer(SessionLine);
                 String temp = tokens.nextToken();
                 //if state == INIT gets the Session Id from the SessionLine
-                if (state == INIT && temp.compareTo("Session:") == 0) {
+                if (state == RtspState.INIT && temp.compareTo("Session:") == 0) {
                     RTSPid = tokens.nextToken();
                 }
                 else if (temp.compareTo("Content-Base:") == 0) {

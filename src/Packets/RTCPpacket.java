@@ -27,24 +27,24 @@ import java.nio.*;
 
 public class RTCPpacket {
 
-    final static int HEADER_SIZE = 8;
-    final static int BODY_SIZE = 24;
+    private final static int HEADER_SIZE = 8;
+    private final static int BODY_SIZE = 24;
 
-	public int Version;			// Version number 2
-    public int Padding;			// Padding of packet
-    public int RC; 				// Reception report count = 1 for one receiver
-    public int PayloadType;		// 201 for Receiver Report
-    public int length;			// 1 source is always 32 bytes: 8 header, 24 body
-    public int Ssrc;			// Ssrc of sender
-    public float fractionLost;	// The fraction of RTP data packets from sender lost since the previous RR packet was sent
-    public int cumLost;			// The total number of RTP data packets from sender that have been lost since the beginning of reception.
-    public int highSeqNb;		// Highest sequence number received
-    public int jitter;			// Not used
-    public int LSR;				// Not used
-    public int DLSR;			// Not used
+	private int Version;			// Version number 2
+    private int Padding;			// Padding of packet
+    private int RC; 				// Reception report count = 1 for one receiver
+    private int PayloadType;		// 201 for Receiver Report
+    private int length;			// 1 source is always 32 bytes: 8 header, 24 body
+    private int Ssrc;			// Ssrc of sender
+    private float fractionLost;	// The fraction of RTP data packets from sender lost since the previous RR packet was sent
+    private int cumLost;			// The total number of RTP data packets from sender that have been lost since the beginning of reception.
+    private int highSeqNb;		// Highest sequence number received
+    private int jitter;			// Not used
+    private int LSR;				// Not used
+    private int DLSR;			// Not used
 
-	public byte[] header;	//Bitstream of header
-	public byte[] body;		//Bitstream of the body
+	private byte[] header;	//Bitstream of header
+	private byte[] body;		//Bitstream of the body
 
     // Constructor from field values
     public RTCPpacket(float fractionLost, int cumLost, int highSeqNb) {
@@ -101,9 +101,9 @@ public class RTCPpacket {
     }
 
     //--------------------------
-    //getpacket: returns the packet bitstream and its length
+    //getPacket: returns the packet bitstream and its length
     //--------------------------
-    public int getpacket(byte[] packet)
+    public int getPacket(byte[] packet)
     {
         //construct the packet = header + body
         System.arraycopy(header, 0, packet, 0, HEADER_SIZE);
@@ -123,5 +123,9 @@ public class RTCPpacket {
     public String toString() {
     	return "[RTCP] Version: " + Version + ", Fraction Lost: " + fractionLost 
     		   + ", Cumulative Lost: " + cumLost + ", Highest Seq Num: " + highSeqNb;
+    }
+
+    public float getFractionLost() {
+        return fractionLost;
     }
 }

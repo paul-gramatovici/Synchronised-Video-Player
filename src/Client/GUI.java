@@ -7,7 +7,7 @@ import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 
 class GUI {
-    private final static int FRAME_PERIOD = 33;
+    private final static int FRAME_PERIOD = 30;
 
     private VideoBuffer videoBuffer;
     private Stats stats;

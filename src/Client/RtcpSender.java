@@ -52,7 +52,7 @@ public class RtcpSender implements ActionListener {
         RTCPpacket rtcp_packet = new RTCPpacket(fractionLost, stats.getCumLost(), stats.getHighSeqNb());
         int packet_length = rtcp_packet.getlength();
         byte[] packet_bits = new byte[packet_length];
-        rtcp_packet.getpacket(packet_bits);
+        rtcp_packet.getPacket(packet_bits);
 
         try {
             DatagramPacket dp = new DatagramPacket(packet_bits, packet_length, serverIP, RTCP_RCV_PORT);
