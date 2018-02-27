@@ -7,16 +7,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class VideoBuffer {
-    private final static int FRAME_PERIOD = 30;
     private List<VideoFrame> frames;
     private Lock lock = new ReentrantLock();
-    private int currentFrame;
-    private int lastFrameShownIndex;
 
     public VideoBuffer() {
         frames = new ArrayList<>();
-        currentFrame = 0;
-        lastFrameShownIndex = 0;
+
     }
 
     public void addFrame(Image image, int seqNum) {
@@ -33,31 +29,19 @@ public class VideoBuffer {
         lock.unlock();
     }
 
-    public Image nextFrame() {
-        currentFrame++;
-        lock.lock();
-        while (lastFrameShownIndex < frames.size() - 1 && frames.get(lastFrameShownIndex).getFrameNumber() < currentFrame) {
-            lastFrameShownIndex++;
+    public Image getFrame(int frameNo) {
+      lock.lock();
+      int i,step;
+      for(i = 0, step = (1<<20); step > 0; step/=2) {
+        if(i+step < frames.size() && frames.get(i+step).getFrameNumber() <= frameNo) {
+          i+=step;
         }
-        while (lastFrameShownIndex > 0 && frames.get(lastFrameShownIndex).getFrameNumber() > currentFrame) {
-            lastFrameShownIndex--;
-        }
-        Image image = frames.get(lastFrameShownIndex).getImage();
-        lock.unlock();
-        return image;
+      }
+      Image frame = frames.get(i).getImage();
+      lock.unlock();
+      return  frame;
     }
 
-    public int getFramePeriod() {
-        return FRAME_PERIOD;
-    }
-
-    public int getVideoTime() {
-        return currentFrame * getFramePeriod();
-    }
-
-    public void setVideoTime(int videoTime) {
-        currentFrame = videoTime / getFramePeriod();
-    }
 
 
 }

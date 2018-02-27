@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
 
 class GUI {
 
-    private VideoBuffer videoBuffer;
+    private VideoPlayer videoPlayer;
     private Stats stats;
 
     private JLabel statLabel1 = new JLabel();
@@ -18,14 +18,14 @@ class GUI {
 
     private int frames = 0;
 
-    GUI(RtspClient rtspClient, VideoBuffer videoBuffer, Stats stats) {
-        this.videoBuffer = videoBuffer;
+    GUI(RtspClient rtspClient, VideoPlayer videoPlayer, Stats stats) {
+        this.videoPlayer = videoPlayer;
         this.stats = stats;
 
         //build GUI
         //--------------------------
 
-        Timer timer = new Timer(videoBuffer.getFramePeriod(), (e) -> update());
+        Timer timer = new Timer(videoPlayer.getFramePeriod(), (e) -> update());
         timer.setInitialDelay(0);
         timer.setCoalesce(true);
 
@@ -52,11 +52,11 @@ class GUI {
         buttonPanel.add(describeButton);
         setupButton.addActionListener((e) -> rtspClient.setup());
         playButton.addActionListener((e) -> {
-            rtspClient.play(); timer.start();});
+            rtspClient.play(); timer.start(); videoPlayer.start();});
         pauseButton.addActionListener((e) -> {
-            rtspClient.pause(); timer.stop();});
+            rtspClient.pause(); timer.stop(); videoPlayer.stop();});
         tearButton.addActionListener((e) -> {
-            rtspClient.teardown(); timer.stop();});
+            rtspClient.teardown(); timer.stop(); videoPlayer.stop();});
         describeButton.addActionListener((e) -> rtspClient.describe());
 
         //Statistics
@@ -94,7 +94,7 @@ class GUI {
     }
 
     private void updateFrame() {
-        Image frame = videoBuffer.nextFrame();
+        Image frame = videoPlayer.getFrame();
         ++frames;
         System.out.println(frames + "\n");
         iconLabel.setIcon(new ImageIcon(frame));

@@ -117,4 +117,8 @@ public class RtpSender implements ActionListener {
         }
         timer.setDelay(cc.getDelay());
     }
+
+  public boolean isRunning() {
+        return timer.isRunning();
+  }
 }

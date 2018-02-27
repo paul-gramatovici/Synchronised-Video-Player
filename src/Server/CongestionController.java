@@ -50,6 +50,7 @@ public class CongestionController implements ActionListener {
         else {
             congestionLevel = 4;
         }
+        System.out.println("CONGESTION: " + congestionLevel + "\n\n");
     }
 
     public int getDelay() {

@@ -16,6 +16,7 @@ public class RtspClient {
     private BufferedReader RTSPBufferedReader;
     private BufferedWriter RTSPBufferedWriter;
     private String VideoFileName; //video file to request to the server
+    private VideoPlayer videoPlayer;
     private int RTSPSeqNb;           //Sequence number of RTSP messages within the session
     private int RTSPid;              // ID of the RTSP session (given by the RTSP Server)
     private int groupId = 0;
@@ -29,7 +30,8 @@ public class RtspClient {
     private final Stats stats; // delete this
 
 
-    public RtspClient(InetAddress serverIPAddr, int RTSP_server_port, String filename, Stats stats, RtpReceiver rtpReceiver, RtcpSender rtcpSender) throws Exception {
+    public RtspClient(InetAddress serverIPAddr, int RTSP_server_port, String filename, Stats stats,
+                      RtpReceiver rtpReceiver, RtcpSender rtcpSender, VideoPlayer videoPlayer) throws Exception {
 
         this.stats = stats;
 
@@ -37,6 +39,7 @@ public class RtspClient {
         this.rtpReceiver = rtpReceiver;
 
         VideoFileName = filename;
+        this.videoPlayer = videoPlayer;
 
         RTSPsocket = new Socket(serverIPAddr, RTSP_server_port);
 
@@ -71,6 +74,15 @@ public class RtspClient {
             {
                 state = RtspState.READY;
                 System.out.println("New RTSP state: READY");
+                /*TODO: Fix block below. An additional request and confirmation should happen to ensure the receivers start before the senders so no packets are lost*/
+                rtpReceiver.start();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                rtcpSender.start();
+                //TODO:----------------------
             }
         }
     }
@@ -86,8 +98,8 @@ public class RtspClient {
             else {
                 state = RtspState.PLAYING;
                 System.out.println("New RTSP state: PLAYING");
-                rtpReceiver.start();
-                rtcpSender.start();
+                //rtpReceiver.start();
+                //rtcpSender.start();
             }
         }
     }
@@ -101,8 +113,6 @@ public class RtspClient {
             } else {
                 state = RtspState.READY;
                 System.out.println("New RTSP state: READY");
-                rtpReceiver.pause();
-                rtcpSender.pause();
             }
         }
     }
@@ -202,7 +212,7 @@ public class RtspClient {
                 default:
                     //otherwise, write the Session line from the RTSPid field
                     RTSPBufferedWriter.write("Session: " + RTSPid +
-                            " VideoTime: " + rtpReceiver.getVideoBuffer().getVideoTime() + CRLF);
+                            " VideoTime: " + videoPlayer.getVideoTime() + CRLF);
                     break;
             }
 

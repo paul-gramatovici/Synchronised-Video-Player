@@ -9,12 +9,14 @@ public class Client {
   public Client() throws Exception {
     Stats stats = new Stats();
     VideoBuffer videoBuffer = new VideoBuffer();
+    VideoPlayer videoPlayer = new VideoPlayer(videoBuffer);
     InetAddress serverIP = InetAddress.getByName("localhost");
     RtcpSender rtcpSender = new RtcpSender(400,stats,serverIP);
     RtpReceiver rtpReceiver = new RtpReceiver(stats,videoBuffer);
 
-    rtspClient = new RtspClient(serverIP, 1051, "res/movie.Mjpeg", stats, rtpReceiver, rtcpSender);
-    gui = new GUI(rtspClient, videoBuffer, stats);
+    rtspClient = new RtspClient(serverIP, 1051, "res/movie.Mjpeg",
+            stats, rtpReceiver, rtcpSender, videoPlayer);
+    gui = new GUI(rtspClient, videoPlayer, stats);
   }
 
   public static void main(String[] args) {

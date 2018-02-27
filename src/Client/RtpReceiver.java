@@ -33,8 +33,6 @@ public class RtpReceiver implements ActionListener {
         timer.setCoalesce(true);
 
         buf = new byte[15000];
-
-        videoBuffer = new VideoBuffer();
     }
 
     public void openSocket() throws SocketException {

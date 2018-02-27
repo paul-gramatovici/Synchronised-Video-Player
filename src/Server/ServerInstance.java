@@ -29,6 +29,7 @@ public class ServerInstance {
     private int RTSPSeqNb = 0; //Sequence number of RTSP messages within the session
 
     private int groupId;
+    private Group group;
     private int lastVideoTime;
 
     //RTCP variables
@@ -60,9 +61,6 @@ public class ServerInstance {
     private void stop() {
         //send back response
         sendResponse();
-        //stop timer
-        rtpSender.stop();
-        rtcpReceiver.stop();
         //update state
         state = RtspState.READY;
         System.out.println("New RTSP state: READY");
@@ -72,8 +70,10 @@ public class ServerInstance {
         //send back response
         sendResponse();
         //start timer
-        rtpSender.start();
-        rtcpReceiver.start();
+       /* if(!rtpSender.isRunning())
+            rtpSender.start();
+        if(!rtcpReceiver.isRunning())
+            rtcpReceiver.start();*/
         //update state
         state = RtspState.PLAYING;
         System.out.println("New RTSP state: PLAYING");
@@ -95,6 +95,11 @@ public class ServerInstance {
 
         rtcpReceiver = RtcpReceiver.getInstance(RTSPid, cc);
 
+        //TODO: Fix block below. See RtspClient
+        rtcpReceiver.start(); //
+        Thread.sleep(1000);
+        rtpSender.start(); //
+        //TODO: --------------------------------
     }
 
     //------------------------------------
@@ -266,6 +271,7 @@ public class ServerInstance {
             }
         }
         System.out.println("£££ Group: " + groupId);
+        group = Group.addToGroup(groupId, this);
         //loop to handle RTSP requests
         while(!killConnection) {
             //parse the request
@@ -299,7 +305,6 @@ public class ServerInstance {
         while(true) {
             ServerInstance serverInstance = new ServerInstance(RTSPport);
             Socket socket = listenSocket.accept();
-            System.out.println("accept");
             serverInstance.serverStart(socket);
         }
         //listenSocket.close();

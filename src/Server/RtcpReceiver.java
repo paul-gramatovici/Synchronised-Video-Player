@@ -85,5 +85,8 @@ public class RtcpReceiver implements ActionListener {
         rtcpTimer.stop();
     }
 
-    //init socket
+    public boolean isRunning() {
+        return rtcpTimer.isRunning();
+    }
+
 }
