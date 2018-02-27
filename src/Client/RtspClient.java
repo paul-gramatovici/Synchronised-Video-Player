@@ -17,7 +17,7 @@ public class RtspClient {
     private BufferedWriter RTSPBufferedWriter;
     private String VideoFileName; //video file to request to the server
     private int RTSPSeqNb;           //Sequence number of RTSP messages within the session
-    private String RTSPid;              // ID of the RTSP session (given by the RTSP ServerInstance.ServerInstance)
+    private int RTSPid;              // ID of the RTSP session (given by the RTSP Server)
 
     //RTCP
     private RtcpSender rtcpSender;
@@ -137,7 +137,7 @@ public class RtspClient {
         try {
             //parse status line and extract the reply_code:
             String StatusLine = RTSPBufferedReader.readLine();
-            System.out.println("RTSP RtspClient.RtspClient - Received from ServerInstance.ServerInstance:");
+            System.out.println("RTSP Client - Received from Server:");
             System.out.println(StatusLine);
 
             StringTokenizer tokens = new StringTokenizer(StatusLine);
@@ -156,7 +156,8 @@ public class RtspClient {
                 String temp = tokens.nextToken();
                 //if state == INIT gets the Session Id from the SessionLine
                 if (state == RtspState.INIT && temp.compareTo("Session:") == 0) {
-                    RTSPid = tokens.nextToken();
+                    RTSPid = Integer.parseInt(tokens.nextToken());
+                    rtcpSender.setSessionID(RTSPid);
                 }
                 else if (temp.compareTo("Content-Base:") == 0) {
                     // Get the DESCRIBE lines

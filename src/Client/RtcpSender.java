@@ -24,7 +24,7 @@ public class RtcpSender implements ActionListener {
 
     private int lastHighSeqNb;      // The last highest Seq number received
     private int lastCumLost;        // The last cumulative packets lost
-
+    private int session;
 
 
     RtcpSender(int interval, Stats stats, InetAddress serverIP) {
@@ -49,7 +49,7 @@ public class RtcpSender implements ActionListener {
         lastHighSeqNb = stats.getHighSeqNb();
         lastCumLost = stats.getCumLost();
 
-        RTCPpacket rtcp_packet = new RTCPpacket(fractionLost, stats.getCumLost(), stats.getHighSeqNb());
+        RTCPpacket rtcp_packet = new RTCPpacket(fractionLost, stats.getCumLost(), stats.getHighSeqNb(), session);
         int packet_length = rtcp_packet.getlength();
         byte[] packet_bits = new byte[packet_length];
         rtcp_packet.getPacket(packet_bits);
@@ -77,5 +77,9 @@ public class RtcpSender implements ActionListener {
     public void stop() {
         rtcpTimer.stop();
         RTCPsocket.close();
+    }
+
+    public void setSessionID(int session) {
+        this.session = session;
     }
 }

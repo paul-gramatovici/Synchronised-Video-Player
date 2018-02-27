@@ -25,7 +25,7 @@ public class ServerInstance {
     private BufferedReader RTSPBufferedReader;
     private BufferedWriter RTSPBufferedWriter;
     private String VideoFileName; //video file requested from the client
-    private String RTSPid = UUID.randomUUID().toString(); //ID of the RTSP session
+    private int RTSPid = IdGenerator.newId(); //ID of the RTSP session
     private int RTSPSeqNb = 0; //Sequence number of RTSP messages within the session
 
     //RTCP variables
@@ -90,7 +90,7 @@ public class ServerInstance {
         //init RTP and RTCP sockets
         rtpSender = new RtpSender(video, cc, RTP_dest_port, ClientIPAddr);
 
-        rtcpReceiver = new RtcpReceiver(cc);
+        rtcpReceiver = RtcpReceiver.getInstance(RTSPid, cc);
 
     }
 
@@ -150,7 +150,7 @@ public class ServerInstance {
             else {
                 //otherwise LastLine will be the SessionId line
                 tokens.nextToken(); //skip Session:
-                RTSPid = tokens.nextToken();
+                RTSPid = Integer.parseInt(tokens.nextToken());
             }
         } catch(Exception ex) {
             System.out.println("Exception caught: "+ex);
@@ -189,7 +189,7 @@ public class ServerInstance {
             RTSPBufferedWriter.write("CSeq: "+RTSPSeqNb+CRLF);
             RTSPBufferedWriter.write("Session: "+RTSPid+CRLF);
             RTSPBufferedWriter.flush();
-            System.out.println("RTSP ServerInstance.ServerInstance - Sent response to RtspClient.RtspClient.");
+            System.out.println("RTSP ServerInstance.ServerInstance - Sent response to Client");
         } catch(Exception ex) {
             System.out.println("Exception caught: "+ex);
             System.exit(0);

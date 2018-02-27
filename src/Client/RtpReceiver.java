@@ -34,7 +34,7 @@ public class RtpReceiver implements ActionListener {
 
     public void openSocket() throws SocketException {
         RTPsocket = new DatagramSocket();
-        RTPsocket.setSoTimeout(5);
+        RTPsocket.setSoTimeout(50);
     }
 
     public void start() {

@@ -39,7 +39,7 @@ public class RTCPpacket {
     private float fractionLost;	// The fraction of RTP data packets from sender lost since the previous RR packet was sent
     private int cumLost;			// The total number of RTP data packets from sender that have been lost since the beginning of reception.
     private int highSeqNb;		// Highest sequence number received
-    private int jitter;			// Not used
+    private int session;
     private int LSR;				// Not used
     private int DLSR;			// Not used
 
@@ -47,7 +47,7 @@ public class RTCPpacket {
 	private byte[] body;		//Bitstream of the body
 
     // Constructor from field values
-    public RTCPpacket(float fractionLost, int cumLost, int highSeqNb) {
+    public RTCPpacket(float fractionLost, int cumLost, int highSeqNb,int session) {
     	Version = 2;
     	Padding = 0;
     	RC = 1;
@@ -58,6 +58,7 @@ public class RTCPpacket {
     	this.fractionLost = fractionLost;
     	this.cumLost = cumLost;
     	this.highSeqNb = highSeqNb;
+    	this.session = session;
 
     	//Construct the bitstreams
     	header = new byte[HEADER_SIZE];
@@ -76,6 +77,7 @@ public class RTCPpacket {
 		bb.putFloat(fractionLost);
 		bb.putInt(cumLost);
 		bb.putInt(highSeqNb);
+		bb.putInt(session);
     }
 
     // Constructor from bit stream
@@ -98,6 +100,7 @@ public class RTCPpacket {
     	fractionLost = bb.getFloat();
     	cumLost = bb.getInt();
     	highSeqNb = bb.getInt();
+    	session = bb.getInt();
     }
 
     //--------------------------
@@ -122,10 +125,14 @@ public class RTCPpacket {
 
     public String toString() {
     	return "[RTCP] Version: " + Version + ", Fraction Lost: " + fractionLost 
-    		   + ", Cumulative Lost: " + cumLost + ", Highest Seq Num: " + highSeqNb;
+    		   + ", Cumulative Lost: " + cumLost + ", Highest Seq Num: " + highSeqNb + "Session: " + session;
     }
 
     public float getFractionLost() {
         return fractionLost;
+    }
+
+    public int getSession() {
+        return session;
     }
 }
