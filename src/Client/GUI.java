@@ -7,7 +7,6 @@ import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 
 class GUI {
-    private final static int FRAME_PERIOD = 30;
 
     private VideoBuffer videoBuffer;
     private Stats stats;
@@ -26,7 +25,7 @@ class GUI {
         //build GUI
         //--------------------------
 
-        Timer timer = new Timer(FRAME_PERIOD, (e) -> update());
+        Timer timer = new Timer(videoBuffer.getFramePeriod(), (e) -> update());
         timer.setInitialDelay(0);
         timer.setCoalesce(true);
 

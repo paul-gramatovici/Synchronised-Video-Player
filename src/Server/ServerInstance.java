@@ -12,7 +12,7 @@ public class ServerInstance {
 
     private RtpSender rtpSender;
 
-    private InetAddress ClientIPAddr;   //Client IP address
+    private InetAddress ClientIPAddress;   //Client IP address
     private int RTP_dest_port = 0;      //destination port for RTP packets  (given by the RTSP Client)
     private int RTSP_dest_port;
     private static final int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
@@ -20,13 +20,16 @@ public class ServerInstance {
     //RTSP variables
     //----------------
     private RtspState state; //RTSP ServerInstance.ServerInstance state == INIT or READY or PLAY
-    private Socket RTSPsocket; //socket used to send/receive RTSP messages
+    private Socket RtspSocket; //socket used to send/receive RTSP messages
     //input and output stream filters
     private BufferedReader RTSPBufferedReader;
     private BufferedWriter RTSPBufferedWriter;
     private String VideoFileName; //video file requested from the client
     private int RTSPid = IdGenerator.newId(); //ID of the RTSP session
     private int RTSPSeqNb = 0; //Sequence number of RTSP messages within the session
+
+    private int groupId;
+    private int lastVideoTime;
 
     //RTCP variables
     //----------------
@@ -88,7 +91,7 @@ public class ServerInstance {
         VideoStream video = new VideoStream(VideoFileName);
 
         //init RTP and RTCP sockets
-        rtpSender = new RtpSender(video, cc, RTP_dest_port, ClientIPAddr);
+        rtpSender = new RtpSender(video, cc, RTP_dest_port, ClientIPAddress);
 
         rtcpReceiver = RtcpReceiver.getInstance(RTSPid, cc);
 
@@ -142,6 +145,8 @@ public class ServerInstance {
                 for (int i=0; i<3; i++)
                     tokens.nextToken(); //skip unused stuff
                 RTP_dest_port = Integer.parseInt(tokens.nextToken());
+                tokens.nextToken(); //skip Group:
+                groupId = Integer.parseInt(tokens.nextToken());
             }
             else if (request_type == RtspRequest.DESCRIBE) {
                 tokens.nextToken();
@@ -151,6 +156,9 @@ public class ServerInstance {
                 //otherwise LastLine will be the SessionId line
                 tokens.nextToken(); //skip Session:
                 RTSPid = Integer.parseInt(tokens.nextToken());
+                tokens.nextToken(); //skip VideoTime:
+                lastVideoTime = Integer.parseInt(tokens.nextToken());
+
             }
         } catch(Exception ex) {
             System.out.println("Exception caught: "+ex);
@@ -189,7 +197,7 @@ public class ServerInstance {
             RTSPBufferedWriter.write("CSeq: "+RTSPSeqNb+CRLF);
             RTSPBufferedWriter.write("Session: "+RTSPid+CRLF);
             RTSPBufferedWriter.flush();
-            System.out.println("RTSP ServerInstance.ServerInstance - Sent response to Client");
+            System.out.println("RTSP Server - Sent response to Client");
         } catch(Exception ex) {
             System.out.println("Exception caught: "+ex);
             System.exit(0);
@@ -203,7 +211,7 @@ public class ServerInstance {
             RTSPBufferedWriter.write("CSeq: "+RTSPSeqNb+CRLF);
             RTSPBufferedWriter.write(des);
             RTSPBufferedWriter.flush();
-            System.out.println("RTSP ServerInstance.ServerInstance - Sent response to RtspClient.RtspClient.");
+            System.out.println("RTSP Server - Sent response to Client.");
         } catch(Exception ex) {
             System.out.println("Exception caught: "+ex);
             System.exit(0);
@@ -211,15 +219,8 @@ public class ServerInstance {
     }
 
     public void serverShutDown() {
-
+        System.out.println("%0%");
         killConnection = true;
-        while(serverThread.isAlive()) {
-            try {
-                wait(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
         try {
             RTSPBufferedReader.close();
             RTSPBufferedWriter.close();
@@ -228,20 +229,21 @@ public class ServerInstance {
         }
         rtpSender.stop();
         rtcpReceiver.stop();
-        System.exit(0);
+        System.out.println("%2%");
+       // System.exit(0);
 
     }
 
     public void serverStart(Socket socket) throws IOException {
         //Initiate TCP connection with the client for the RTSP session
-        RTSPsocket = socket;
+        RtspSocket = socket;
 
         //Get RtspClient.RtspClient IP address
-        ClientIPAddr = RTSPsocket.getInetAddress();
+        ClientIPAddress = RtspSocket.getInetAddress();
 
         //Set input and output stream filters:
-        RTSPBufferedReader = new BufferedReader(new InputStreamReader(RTSPsocket.getInputStream()) );
-        RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(RTSPsocket.getOutputStream()) );
+        RTSPBufferedReader = new BufferedReader(new InputStreamReader(RtspSocket.getInputStream()) );
+        RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(RtspSocket.getOutputStream()) );
 
         serverThread = new Thread(this::serverRun);
         serverThread.start();
@@ -263,7 +265,7 @@ public class ServerInstance {
                 }
             }
         }
-
+        System.out.println("£££ Group: " + groupId);
         //loop to handle RTSP requests
         while(!killConnection) {
             //parse the request
@@ -284,6 +286,7 @@ public class ServerInstance {
                 System.out.println("Received DESCRIBE request");
                 sendDescribe();
             }
+            System.out.println("£££ VideoTime: " + lastVideoTime);
         }
 
     }

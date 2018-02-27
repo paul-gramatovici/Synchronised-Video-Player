@@ -18,6 +18,11 @@ public class RtpReceiver implements ActionListener {
     private DatagramSocket RTPsocket;        //socket to be used to send and receive UDP packets
     private Timer timer; //timer used to receive data from the UDP socket
     private byte[] buf;  //buffer used to store data received from the server
+
+    public VideoBuffer getVideoBuffer() {
+        return videoBuffer;
+    }
+
     private VideoBuffer videoBuffer;
 
     RtpReceiver(Stats stats, VideoBuffer videoBuffer) {

@@ -18,6 +18,7 @@ public class RtspClient {
     private String VideoFileName; //video file to request to the server
     private int RTSPSeqNb;           //Sequence number of RTSP messages within the session
     private int RTSPid;              // ID of the RTSP session (given by the RTSP Server)
+    private int groupId = 0;
 
     //RTCP
     private RtcpSender rtcpSender;
@@ -178,7 +179,7 @@ public class RtspClient {
     private void sendRequest(String request_type) {
         RTSPSeqNb ++;
         try {
-            //Use the RTSPBufferedWriter to write to the RTSP socket
+             //Use the RTSPBufferedWriter to write to the RTSP socket
 
             //write the request line:
             RTSPBufferedWriter.write(request_type + " " + VideoFileName + " RTSP/1.0" + CRLF);
@@ -191,14 +192,17 @@ public class RtspClient {
             //the RTP packets RTP_RCV_PORT
             switch (request_type) {
                 case "SETUP":
-                    RTSPBufferedWriter.write("Transport: RTP/UDP; client_port= " + rtpReceiver.getLocalPort() + CRLF);
+                    RTSPBufferedWriter.write("Transport: RTP/UDP; client_port= "
+                            + rtpReceiver.getLocalPort() + /*vspReceiver.getLocalPort + */
+                            " Group: " + groupId + CRLF);
                     break;
                 case "DESCRIBE":
                     RTSPBufferedWriter.write("Accept: application/sdp" + CRLF);
                     break;
                 default:
                     //otherwise, write the Session line from the RTSPid field
-                    RTSPBufferedWriter.write("Session: " + RTSPid + CRLF);
+                    RTSPBufferedWriter.write("Session: " + RTSPid +
+                            " VideoTime: " + rtpReceiver.getVideoBuffer().getVideoTime() + CRLF);
                     break;
             }
 
