@@ -37,7 +37,7 @@ public class VspSender {
 
   public void sendPause(int time) {
     try {
-      writer.write("PLAY " + time + CRLF);
+      writer.write("PAUSE " + time + CRLF);
       writer.flush();
     } catch (IOException e) {
       e.printStackTrace();

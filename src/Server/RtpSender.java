@@ -98,9 +98,9 @@ public class RtpSender implements ActionListener {
                 DatagramPacket senddp = new DatagramPacket(packet_bits, packet_length, clientIP, destinationPort);
                 RTPsocket.send(senddp);
 
-                System.out.println("Send frame #" + imagenb + ", Frame size: " + image_length + " (" + buf.length + ")");
+                //System.out.println("Send frame #" + imagenb + ", Frame size: " + image_length + " (" + buf.length + ")");
                 //print the header bitstream
-                rtp_packet.printheader();
+                //rtp_packet.printheader();
 
                 //gui.update(imagenb);
 

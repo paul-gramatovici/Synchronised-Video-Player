@@ -50,11 +50,11 @@ class GUI {
         buttonPanel.add(tearButton);
         JButton describeButton = new JButton("Session");
         buttonPanel.add(describeButton);
-        setupButton.addActionListener((e) -> rtspClient.setup());
+        setupButton.addActionListener((e) -> {rtspClient.setup(); timer.start();});
         playButton.addActionListener((e) -> {
-            rtspClient.play(); timer.start(); videoPlayer.start();});
+            rtspClient.play(); /*videoPlayer.start();*/});
         pauseButton.addActionListener((e) -> {
-            rtspClient.pause(); timer.stop(); videoPlayer.stop();});
+            rtspClient.pause(); /*videoPlayer.stop();*/});
         tearButton.addActionListener((e) -> {
             rtspClient.teardown(); timer.stop(); videoPlayer.stop();});
         describeButton.addActionListener((e) -> rtspClient.describe());
@@ -97,7 +97,9 @@ class GUI {
         Image frame = videoPlayer.getFrame();
         ++frames;
         System.out.println(frames + "\n");
-        iconLabel.setIcon(new ImageIcon(frame));
+        if(frame != null) {
+            iconLabel.setIcon(new ImageIcon(frame));
+        }
     }
 
     private void update() {

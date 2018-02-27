@@ -68,10 +68,10 @@ public class RtpReceiver implements ActionListener {
             //this is the highest seq num received
 
             //print important header fields of the RTP packet received:
-            System.out.println("Got RTP packet with SeqNum # " + seqNb
+            /*System.out.println("Got RTP packet with SeqNum # " + seqNb
                     + " TimeStamp " + rtp_packet.gettimestamp() + " ms, of type "
                     + rtp_packet.getpayloadtype());
-
+*/
             //print header bitstream:
             rtp_packet.printheader();
 

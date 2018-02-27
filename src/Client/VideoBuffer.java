@@ -1,6 +1,7 @@
 package Client;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -31,6 +32,8 @@ public class VideoBuffer {
 
     public Image getFrame(int frameNo) {
       lock.lock();
+      if(frames.isEmpty())
+        return null;
       int i,step;
       for(i = 0, step = (1<<20); step > 0; step/=2) {
         if(i+step < frames.size() && frames.get(i+step).getFrameNumber() <= frameNo) {

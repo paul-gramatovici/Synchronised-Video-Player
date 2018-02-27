@@ -29,6 +29,7 @@ public class RtspClient {
 
     private final Stats stats; // delete this
 
+    VspReceiver vspReceiver;
 
     public RtspClient(InetAddress serverIPAddr, int RTSP_server_port, String filename, Stats stats,
                       RtpReceiver rtpReceiver, RtcpSender rtcpSender, VideoPlayer videoPlayer) throws Exception {
@@ -52,7 +53,8 @@ public class RtspClient {
     }
 
     public void setup(){
-        System.out.println("Setup Button pressed !");
+        //System.out.println("Setup Button pressed !");
+        stats.setStartTime(System.currentTimeMillis());
         if (state == RtspState.INIT) {
             try {
                 rtpReceiver.openSocket();
@@ -60,20 +62,26 @@ public class RtspClient {
             }
             catch (SocketException se)
             {
-                System.out.println("Socket exception: "+se);
+               // System.out.println("Socket exception: "+se);
                 System.exit(0);
             }
 
             RTSPSeqNb = 0;
 
             sendRequest("SETUP");
-            System.out.println("***!");
+            //System.out.println("***!");
             if (parseServerResponse() != 200)
                 System.out.println("Invalid ServerInstance.ServerInstance Response");
             else
             {
                 state = RtspState.READY;
-                System.out.println("New RTSP state: READY");
+                //System.out.println("New RTSP state: READY");
+                try {
+                    vspReceiver = new VspReceiver(RTSPsocket.getInetAddress(),12345, videoPlayer, RTSPid, 0, this);
+                    vspReceiver.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 /*TODO: Fix block below. An additional request and confirmation should happen to ensure the receivers start before the senders so no packets are lost*/
                 rtpReceiver.start();
                 try {
@@ -88,16 +96,15 @@ public class RtspClient {
     }
 
     public void play() {
-        System.out.println("Play Button pressed!");
-        stats.setStartTime(System.currentTimeMillis());
+        //System.out.println("Play Button pressed!");
         if (state == RtspState.READY) {
             sendRequest("PLAY");
             if (parseServerResponse() != 200) {
                 System.out.println("Invalid ServerInstance.ServerInstance Response");
             }
             else {
-                state = RtspState.PLAYING;
-                System.out.println("New RTSP state: PLAYING");
+                //state = RtspState.PLAYING;
+                //System.out.println("New RTSP state: PLAYING");
                 //rtpReceiver.start();
                 //rtcpSender.start();
             }
@@ -105,13 +112,13 @@ public class RtspClient {
     }
 
     public void pause(){
-       System.out.println("Pause Button pressed!");
+      // System.out.println("Pause Button pressed!");
         if (state == RtspState.PLAYING) {
             sendRequest("PAUSE");
             if (parseServerResponse() != 200) {
                 System.out.println("Invalid ServerInstance.ServerInstance Response");
             } else {
-                state = RtspState.READY;
+                //state = RtspState.READY;
                 System.out.println("New RTSP state: READY");
             }
         }
@@ -223,4 +230,7 @@ public class RtspClient {
         }
     }
 
+    public void setState(RtspState state) {
+        this.state = state;
+    }
 }

@@ -62,8 +62,5 @@ public class VspMasterSender {
     }
   }
 
-  public static void main(String[] args) {
-    VspMasterSender masterSender = new VspMasterSender();
-    masterSender.start();
-  }
+
 }

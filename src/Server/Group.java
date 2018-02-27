@@ -27,16 +27,15 @@ public class Group {
       return group;
     }
   }
-  /*
   public void signalPlay(int time) {
     for (ServerInstance session: sessions) {
-      session.signalPlay();
+      session.signalPlay(time);
     }
   }
 
   public void signalPause(int time) {
     for (ServerInstance session: sessions) {
-      session.signalPause();
+      session.signalPause(time);
     }
-  }*/
+  }
 }

@@ -125,7 +125,7 @@ public class RTCPpacket {
 
     public String toString() {
     	return "[RTCP] Version: " + Version + ", Fraction Lost: " + fractionLost 
-    		   + ", Cumulative Lost: " + cumLost + ", Highest Seq Num: " + highSeqNb + "Session: " + session;
+    		   + ", Cumulative Lost: " + cumLost + ", Highest Seq Num: " + highSeqNb + " Session: " + session;
     }
 
     public float getFractionLost() {

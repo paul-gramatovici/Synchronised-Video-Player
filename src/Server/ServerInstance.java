@@ -42,10 +42,13 @@ public class ServerInstance {
     private final static String CRLF = "\r\n";
     private boolean killConnection;
 
+    private VspMasterSender vspMasterSender;
+    private VspSender vspSender;
     //--------------------------------
     //Constructor
     //--------------------------------
-    public ServerInstance(int RTP_dest_port) {
+    public ServerInstance(int RTP_dest_port, VspMasterSender vspMasterSender) {
+        this.vspMasterSender = vspMasterSender;
 
         //init RTP sending Timer
         cc = new CongestionController(600);
@@ -62,8 +65,10 @@ public class ServerInstance {
         //send back response
         sendResponse();
         //update state
-        state = RtspState.READY;
-        System.out.println("New RTSP state: READY");
+        group.signalPause(lastVideoTime);
+        System.out.println("Last time = " + lastVideoTime);
+        //state = RtspState.READY;
+       // System.out.println("New RTSP state: READY");
     }
 
     private void play() {
@@ -75,8 +80,9 @@ public class ServerInstance {
         if(!rtcpReceiver.isRunning())
             rtcpReceiver.start();*/
         //update state
-        state = RtspState.PLAYING;
-        System.out.println("New RTSP state: PLAYING");
+        group.signalPlay(lastVideoTime);
+        //state = RtspState.PLAYING;
+        //System.out.println("New RTSP state: PLAYING");
     }
 
     private void setup() throws Exception {
@@ -94,6 +100,8 @@ public class ServerInstance {
         rtpSender = new RtpSender(video, cc, RTP_dest_port, ClientIPAddress);
 
         rtcpReceiver = RtcpReceiver.getInstance(RTSPid, cc);
+
+        vspSender = vspMasterSender.getVspSender(RTSPid);
 
         //TODO: Fix block below. See RtspClient
         rtcpReceiver.start(); //
@@ -152,6 +160,7 @@ public class ServerInstance {
                 RTP_dest_port = Integer.parseInt(tokens.nextToken());
                 tokens.nextToken(); //skip Group:
                 groupId = Integer.parseInt(tokens.nextToken());
+                group = Group.addToGroup(groupId, this);
             }
             else if (request_type == RtspRequest.DESCRIBE) {
                 tokens.nextToken();
@@ -271,7 +280,6 @@ public class ServerInstance {
             }
         }
         System.out.println("£££ Group: " + groupId);
-        group = Group.addToGroup(groupId, this);
         //loop to handle RTSP requests
         while(!killConnection) {
             //parse the request
@@ -281,6 +289,7 @@ public class ServerInstance {
                 play();
             }
             else if ((request_type == RtspRequest.PAUSE) && (state == RtspState.PLAYING)) {
+                System.out.println();
                 stop();
             }
             else if (request_type == RtspRequest.TEARDOWN) {
@@ -296,20 +305,30 @@ public class ServerInstance {
         }
 
     }
+
+    public void signalPlay(int time) {
+        state = RtspState.PLAYING;
+        vspSender.sendPlay(time);
+    }
+    public void signalPause(int time) {
+        state = RtspState.READY;
+        vspSender.sendPause(time);
+    }
+
     //------------------------------------
     //main
     //------------------------------------
     public static void main(String argv[]) throws Exception {
         int RTSPport = Integer.parseInt(argv[0]);
         ServerSocket listenSocket = new ServerSocket(RTSPport);
+        VspMasterSender vspMasterSender = new VspMasterSender();
+        vspMasterSender.start();
         while(true) {
-            ServerInstance serverInstance = new ServerInstance(RTSPport);
+            ServerInstance serverInstance = new ServerInstance(RTSPport, vspMasterSender);
             Socket socket = listenSocket.accept();
             serverInstance.serverStart(socket);
         }
         //listenSocket.close();
-
-
     }
 
 
